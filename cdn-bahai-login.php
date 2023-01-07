@@ -59,8 +59,8 @@ function my_plugin_callback()
 {
   // phpinfo();
 
-  // act -- fixed = auth -- from Portal
   // src -- fixed        -- from this plugin
+  // act -- fixed = auth -- from Portal
   $src = get_query_var('src');
   $act = get_query_var('act');
   echo 'TEST - ', $src, $act;
@@ -94,22 +94,22 @@ function processIncomingAuthRequest($sk)
   $xml = simplexml_load_string($response);
   $data = $xml->FieldData;
 
-  $LoginStatus = $data->LoginStatus;
+  $LoginStatus = $data->LoginStatus->__toString();
 
   if ($LoginStatus == 'Active') {
 
-    $BahaiID = $data->BahaiID;
-    $FirstName = $data->FirstName;
-    $LastName = $data->LastName;
-    $BirthDate = $data->BirthDate;
-    $Gender = $data->Gender;
-    $EmailAddress = $data->EmailAddress;
-    $WithholdMail = $data->WithholdMail;
-    $Screening = $data->Screening;
-    $LSA_Field1 = $data->LSA_Field1;
-    $LSA_Field2 = $data->LSA_Field2;
-    $LSector = $data->LSector;
-    $LNeighbourhood = $data->LNeighbourhood;
+    $BahaiID = $data->BahaiID->__toString();
+    $FirstName = $data->FirstName->__toString();
+    $LastName = $data->LastName->__toString();
+    $BirthDate = $data->BirthDate->__toString();
+    $Gender = $data->Gender->__toString();
+    $EmailAddress = $data->EmailAddress->__toString();
+    $WithholdMail = $data->WithholdMail->__toString();
+    $Screening = $data->Screening->__toString();
+    $LSA_Field1 = $data->LSA_Field1->__toString();
+    $LSA_Field2 = $data->LSA_Field2->__toString();
+    $LSector = $data->LSector->__toString();
+    $LNeighbourhood = $data->LNeighbourhood->__toString();
 
     // echo "Baha'i ID = {$xml->FieldData->BahaiID} for Canada";
 
@@ -136,12 +136,14 @@ function processIncomingAuthRequest($sk)
         'role'       => 'subscriber',
         'first_name' => $FirstName,
         'last_name'  => $LastName,
+        'show_admin_bar_front' => false,
       );
 
       $user_id = wp_insert_user($new_user_array);
     } else {
       // returning user
       $user_id = $user->ID;
+      $username = $user->user_login;
     }
 
     $props = array();
@@ -159,10 +161,10 @@ function processIncomingAuthRequest($sk)
     //   echo 'User profile updated: ' . $result;
     // }
 
-    wp_set_current_user($user_id, $username);
+    wp_set_current_user($user_id);
     wp_set_auth_cookie($user_id, true);
 
-    // remove querystring
+    // redirect back to same page without the querystring
     wp_redirect(strtok($_SERVER["REQUEST_URI"], '?'));
   } else {
     echo 'Not logged in: ' . $LoginStatus;
